@@ -4,7 +4,7 @@
 #include <cstring>
 
 Picture::Picture(unsigned int w, unsigned int h)
-	:m_Weight(w), m_Height(h), m_pContent(new unsigned char[w * h * 4])
+	:m_Width(w), m_Height(h), m_pContent(new unsigned char[w * h * 4])
 {
 	memset(m_pContent, 0, sizeof(unsigned char) * w * h * 4);
 }
@@ -17,13 +17,13 @@ Picture::~Picture()
 void Picture::Print(const std::string& filename)
 {
 	FILE* fp = fopen(filename.c_str(), "wb");
-	svpng(fp, m_Weight, m_Height, m_pContent, 1);
+	svpng(fp, m_Width, m_Height, m_pContent, 1);
 	fclose(fp);
 }
 
 void Picture::DrawPoint(unsigned int x, unsigned int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	unsigned int idx = (m_Weight * y + x) * 4;
+	unsigned int idx = (m_Width * y + x) * 4;
 	m_pContent[idx++] = r;
 	m_pContent[idx++] = g;
 	m_pContent[idx++] = b;
@@ -32,7 +32,7 @@ void Picture::DrawPoint(unsigned int x, unsigned int y, unsigned char r, unsigne
 
 void Picture::FreeDrawPoint(int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if (x < 0 || x >= m_Weight)
+	if (x < 0 || x >= m_Width)
 		return;
 	if (y < 0 || y >= m_Height)
 		return;
@@ -46,17 +46,27 @@ void Picture::DrawPoint(unsigned int x, unsigned int y, RGBA color)
 
 RGBA Picture::GetPoint(unsigned int x, unsigned int y) const
 {
-	unsigned int idx = (m_Weight * y + x) * 4;
+	unsigned int idx = (m_Width * y + x) * 4;
 	return RGBA(m_pContent[idx++], m_pContent[idx++], m_pContent[idx++], m_pContent[idx]);
 }
 
 RGBA Picture::FreeGetPoint(int x, int y) const
 {
-	if (x < 0 || x >= m_Weight)
+	if (x < 0 || x >= m_Width)
 		return RGBA();
 	if (y < 0 || y >= m_Height)
 		return RGBA();
 	return GetPoint(x, y);
+}
+
+unsigned int Picture::GetWidth() const
+{
+	return m_Width;
+}
+
+unsigned int Picture::GetHeight() const
+{
+	return m_Height;
 }
 
 void Picture::FreeDrawPoint(int x, int y, RGBA color)

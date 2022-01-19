@@ -32,8 +32,10 @@ public:
 	void FreeDrawPoint(int x, int y, RGBA color);
 	RGBA GetPoint(unsigned int x, unsigned int y) const;
 	RGBA FreeGetPoint(int x, int y) const;
+	unsigned int GetWidth()const;
+	unsigned int GetHeight()const;
 private:
-	unsigned int m_Weight;
+	unsigned int m_Width;
 	unsigned int m_Height;
 	unsigned char* m_pContent;
 };

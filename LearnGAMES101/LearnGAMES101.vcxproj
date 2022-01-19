@@ -150,13 +150,18 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="InputData.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MathDefinition.cpp" />
     <ClCompile Include="Picture.cpp" />
+    <ClCompile Include="Rasterizer.cpp" />
+    <ClCompile Include="ViewPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="InputData.h" />
     <ClInclude Include="MathDefinition.h" />
     <ClInclude Include="Picture.h" />
+    <ClInclude Include="Rasterizer.h" />
+    <ClInclude Include="ViewPort.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
