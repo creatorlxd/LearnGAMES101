@@ -37,6 +37,32 @@ namespace
 		return true;
 	}
 
+	bool IsPixelOnTriangle(uint64_t p_x, uint64_t p_y, const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
+	{
+		float pxf = (float)p_x + 0.5f;
+		float pyf = (float)p_y + 0.5f;
+		LearnGames::Vector2 e01 = LearnGames::Vector4ToVector2(v1 - v0);
+		LearnGames::Vector2 e12 = LearnGames::Vector4ToVector2(v2 - v1);
+		LearnGames::Vector2 e20 = LearnGames::Vector4ToVector2(v0 - v2);
+		LearnGames::Vector2 e0p = LearnGames::Vector2(pxf - v0(0), pyf - v0(1));
+		LearnGames::Vector2 e1p = LearnGames::Vector2(pxf - v1(0), pyf - v1(1));
+		LearnGames::Vector2 e2p = LearnGames::Vector2(pxf - v2(0), pyf - v2(1));
+
+		e01.normalize();
+		e12.normalize();
+		e20.normalize();
+
+		if (abs(LearnGames::Cross2(e01, e0p)) <= 0.75)
+			return true;
+		if (abs(LearnGames::Cross2(e12, e1p)) <= 0.75)
+			return true;
+		if (abs(LearnGames::Cross2(e20, e2p)) <= 0.75)
+			return true;
+
+		return false;
+	}
+
+
 	bool IsBackFace(const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
 	{
 		LearnGames::Vector2 e01 = LearnGames::Vector4ToVector2(v1 - v0);
@@ -77,9 +103,21 @@ void LearnGames::Rasterize(Picture& pic_out, const std::vector<Vertex>& vertices
 		{
 			for (uint64_t _j = min_y; _j <= max_y; ++_j)
 			{
-				if (IsPixelInTriangle(_i, _j, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
+				if (state == RasterizationState::Solid)
 				{
-					pic_out.DrawPoint(_i, _j, RGBA(255, 0, 0, 255));
+					if (IsPixelInTriangle(_i, _j, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
+					{
+						//todo
+						pic_out.DrawPoint(_i, _j, RGBA(255, 0, 0, 255));
+					}
+				}
+				else if (state == RasterizationState::Wireframe)
+				{
+					if (IsPixelOnTriangle(_i, _j, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
+					{
+						//todo
+						pic_out.DrawPoint(_i, _j, RGBA(255, 0, 0, 255));
+					}
 				}
 			}
 		}
