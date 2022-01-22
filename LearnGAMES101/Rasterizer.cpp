@@ -7,10 +7,8 @@ namespace
 {
 	const float raster_eps = 0.00001f;
 
-	bool IsPixelInTriangle(uint64_t p_x, uint64_t p_y, const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
+	bool IsPixelInTriangle(float pxf, float pyf, const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
 	{
-		float pxf = (float)p_x + 0.5f;
-		float pyf = (float)p_y + 0.5f;
 		LearnGames::Vector2 e01 = LearnGames::Vector4ToVector2(v1 - v0);
 		LearnGames::Vector2 e12 = LearnGames::Vector4ToVector2(v2 - v1);
 		LearnGames::Vector2 e20 = LearnGames::Vector4ToVector2(v0 - v2);
@@ -37,10 +35,8 @@ namespace
 		return true;
 	}
 
-	bool IsPixelOnTriangle(uint64_t p_x, uint64_t p_y, const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
+	bool IsPixelOnTriangle(float pxf, float pyf, const LearnGames::Vector4& v0, const LearnGames::Vector4& v1, const LearnGames::Vector4& v2)
 	{
-		float pxf = (float)p_x + 0.5f;
-		float pyf = (float)p_y + 0.5f;
 		LearnGames::Vector2 e01 = LearnGames::Vector4ToVector2(v1 - v0);
 		LearnGames::Vector2 e12 = LearnGames::Vector4ToVector2(v2 - v1);
 		LearnGames::Vector2 e20 = LearnGames::Vector4ToVector2(v0 - v2);
@@ -52,11 +48,11 @@ namespace
 		e12.normalize();
 		e20.normalize();
 
-		if (abs(LearnGames::Cross2(e01, e0p)) <= 0.75)
+		if (abs(LearnGames::Cross2(e01, e0p)) <= 0.75f)
 			return true;
-		if (abs(LearnGames::Cross2(e12, e1p)) <= 0.75)
+		if (abs(LearnGames::Cross2(e12, e1p)) <= 0.75f)
 			return true;
-		if (abs(LearnGames::Cross2(e20, e2p)) <= 0.75)
+		if (abs(LearnGames::Cross2(e20, e2p)) <= 0.75f)
 			return true;
 
 		return false;
@@ -72,15 +68,14 @@ namespace
 	}
 }
 
-void LearnGames::Rasterize(Picture& pic_out, const std::vector<Vertex>& vertices, const std::vector<uint64_t>& indices, RasterizationState state)
+std::vector<std::vector<LearnGames::Pixel>> LearnGames::Rasterize(uint64_t width, uint64_t height, const std::vector<Vertex>& vertices, const std::vector<uint64_t>& indices, RasterizationState state, uint64_t msaa_x, uint64_t msaa_y)
 {
 	assert(indices.size() % 3 == 0);
-
-	uint64_t width = pic_out.GetWidth();
-	uint64_t height = pic_out.GetHeight();
+	std::vector<std::vector<LearnGames::Pixel>> re;
 
 	for (uint64_t i = 0; i < indices.size(); i += 3)
 	{
+		std::vector<Pixel> triangle;
 		//back face culling
 		if (IsBackFace(vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
 			continue;
@@ -90,8 +85,13 @@ void LearnGames::Rasterize(Picture& pic_out, const std::vector<Vertex>& vertices
 		uint64_t max_x = 0, max_y = 0;
 		for (uint64_t j = i; j < i + 3; ++j)
 		{
-			uint64_t x = floor(vertices[indices[j]].m_Datas[0].first(0) - raster_eps);
-			uint64_t y = floor(vertices[indices[j]].m_Datas[0].first(1) - raster_eps);
+			uint64_t x = floor(vertices[indices[j]].m_Datas[0].first(0));
+			uint64_t y = floor(vertices[indices[j]].m_Datas[0].first(1));
+			//edge process
+			if (x == width)
+				x -= 1;
+			if (y == height)
+				y -= 1;
 			assert(x < width);
 			assert(y < height);
 			min_x = std::min(min_x, x);
@@ -103,23 +103,35 @@ void LearnGames::Rasterize(Picture& pic_out, const std::vector<Vertex>& vertices
 		{
 			for (uint64_t _j = min_y; _j <= max_y; ++_j)
 			{
+				bool(*pjudge)(float, float, const Vector4&, const Vector4&, const Vector4&) = nullptr;
 				if (state == RasterizationState::Solid)
-				{
-					if (IsPixelInTriangle(_i, _j, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
-					{
-						//todo
-						pic_out.DrawPoint(_i, _j, RGBA(255, 0, 0, 255));
-					}
-				}
+					pjudge = &IsPixelInTriangle;
 				else if (state == RasterizationState::Wireframe)
+					pjudge = &IsPixelOnTriangle;
+
+				assert(msaa_x > 0);
+				assert(msaa_y > 0);
+				uint64_t cnt = 0;
+				float d_x = 1.0f / (float)msaa_x;
+				float d_y = 1.0f / (float)msaa_y;
+				for (float pxf = (float)_i + d_x / 2.0f; pxf < (float)_i + 1.0f; pxf += d_x)
 				{
-					if (IsPixelOnTriangle(_i, _j, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
+					for (float pyf = (float)_j + d_y / 2.0f; pyf < (float)_j + 1.0f; pyf += d_y)
 					{
-						//todo
-						pic_out.DrawPoint(_i, _j, RGBA(255, 0, 0, 255));
+						if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
+							++cnt;
 					}
 				}
+				Pixel pixel;
+				pixel.m_X = _i;
+				pixel.m_Y = _j;
+				pixel.m_Z = 0.0f; //wait for interploation
+				pixel.m_MSAAValue = (float)cnt / (float)(msaa_x * msaa_y);
+				triangle.emplace_back(pixel);
 			}
 		}
+		if (triangle.size())
+			re.emplace_back(std::move(triangle));
 	}
+	return re;
 }

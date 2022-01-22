@@ -8,8 +8,7 @@ namespace LearnGames
 {
 	enum class DataProperty :uint8_t
 	{
-		DoInterpolation = 0,
-		DoNothing = 1
+		DoNothing = 0
 	};
 
 	struct Vertex

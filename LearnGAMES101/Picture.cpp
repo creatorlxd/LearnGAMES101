@@ -9,9 +9,22 @@ Picture::Picture(unsigned int w, unsigned int h)
 	memset(m_pContent, 0, sizeof(unsigned char) * w * h * 4);
 }
 
+Picture::Picture(const Picture& pic)
+	: m_Width(pic.m_Width), m_Height(pic.m_Height), m_pContent(new unsigned char[pic.m_Width * pic.m_Height * 4])
+{
+	memcpy(m_pContent, pic.m_pContent, sizeof(unsigned char) * pic.m_Width * pic.m_Height * 4);
+}
+
+Picture::Picture(Picture&& pic)
+	: m_Width(pic.m_Width), m_Height(pic.m_Height), m_pContent(pic.m_pContent)
+{
+	pic.m_pContent = nullptr;
+}
+
 Picture::~Picture()
 {
-	delete[] m_pContent;
+	if (m_pContent)
+		delete[] m_pContent;
 }
 
 void Picture::Print(const std::string& filename)
@@ -67,6 +80,28 @@ unsigned int Picture::GetWidth() const
 unsigned int Picture::GetHeight() const
 {
 	return m_Height;
+}
+
+Picture& Picture::operator=(const Picture& pic)
+{
+	if (m_pContent)
+		delete[] m_pContent;
+	m_Width = pic.m_Width;
+	m_Height = pic.m_Height;
+	m_pContent = new unsigned char[pic.m_Width * pic.m_Height * 4];
+	memcpy(m_pContent, pic.m_pContent, sizeof(unsigned char) * pic.m_Width * pic.m_Height * 4);
+	return *this;
+}
+
+Picture& Picture::operator=(Picture&& pic)
+{
+	if (m_pContent)
+		delete[] m_pContent;
+	m_Width = pic.m_Width;
+	m_Height = pic.m_Height;
+	m_pContent = pic.m_pContent;
+	pic.m_pContent = nullptr;
+	return *this;
 }
 
 void Picture::FreeDrawPoint(int x, int y, RGBA color)

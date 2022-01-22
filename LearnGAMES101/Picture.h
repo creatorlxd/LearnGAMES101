@@ -24,6 +24,8 @@ class Picture
 {
 public:
 	Picture(unsigned int w, unsigned int h);
+	Picture(const Picture& pic);
+	Picture(Picture&& pic);
 	~Picture();
 	void Print(const std::string& filename);
 	void DrawPoint(unsigned int x, unsigned int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
@@ -34,6 +36,9 @@ public:
 	RGBA FreeGetPoint(int x, int y) const;
 	unsigned int GetWidth()const;
 	unsigned int GetHeight()const;
+
+	Picture& operator= (const Picture& pic);
+	Picture& operator= (Picture&& pic);
 private:
 	unsigned int m_Width;
 	unsigned int m_Height;

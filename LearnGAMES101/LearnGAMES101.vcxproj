@@ -151,6 +151,7 @@
     <ClCompile Include="InputData.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MathDefinition.cpp" />
+    <ClCompile Include="Output.cpp" />
     <ClCompile Include="Picture.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="ViewPort.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="InputData.h" />
     <ClInclude Include="MathDefinition.h" />
+    <ClInclude Include="Output.h" />
     <ClInclude Include="Picture.h" />
     <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="ViewPort.h" />
