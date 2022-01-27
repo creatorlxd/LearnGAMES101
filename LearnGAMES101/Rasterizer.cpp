@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 namespace
 {
@@ -68,9 +69,35 @@ namespace
 	}
 }
 
-std::vector<std::vector<LearnGames::Pixel>> LearnGames::Rasterize(uint64_t width, uint64_t height, const std::vector<Vertex>& vertices, const std::vector<uint64_t>& indices, RasterizationState state, uint64_t msaa_x, uint64_t msaa_y)
+LearnGames::Vector2 LearnGames::GetMSAAPoint(uint64_t msaa_way, uint64_t idx)
+{
+	assert(idx < msaa_way);
+	if (msaa_way == 1)
+		return Vector2(0.5f, 0.5f);
+	else if (msaa_way == 4)
+	{
+		if (idx == 0)
+			return Vector2(0.375f, 0.125f);
+		else if (idx == 1)
+			return Vector2(0.875f, 0.375f);
+		else if (idx == 2)
+			return Vector2(0.125f, 0.625f);
+		else if (idx == 3)
+			return Vector2(0.625f, 0.875f);
+		else
+			abort();
+	}
+	else
+	{
+		std::cerr << "not support this msaa way" << std::endl;
+		abort();
+	}
+}
+
+std::vector<std::vector<LearnGames::Pixel>> LearnGames::Rasterize(uint64_t width, uint64_t height, const std::vector<Vertex>& vertices, const std::vector<uint64_t>& indices, RasterizationState state, uint64_t msaa_way)
 {
 	assert(indices.size() % 3 == 0);
+	assert(msaa_way > 0);
 	std::vector<std::vector<LearnGames::Pixel>> re;
 
 	for (uint64_t i = 0; i < indices.size(); i += 3)
@@ -109,25 +136,21 @@ std::vector<std::vector<LearnGames::Pixel>> LearnGames::Rasterize(uint64_t width
 				else if (state == RasterizationState::Wireframe)
 					pjudge = &IsPixelOnTriangle;
 
-				assert(msaa_x > 0);
-				assert(msaa_y > 0);
-				uint64_t cnt = 0;
-				float d_x = 1.0f / (float)msaa_x;
-				float d_y = 1.0f / (float)msaa_y;
-				for (float pxf = (float)_i + d_x / 2.0f; pxf < (float)_i + 1.0f; pxf += d_x)
+				Pixel pixel;
+				for (uint64_t msaa_idx = 0; msaa_idx < msaa_way; ++msaa_idx)
 				{
-					for (float pyf = (float)_j + d_y / 2.0f; pyf < (float)_j + 1.0f; pyf += d_y)
+					Vector2 p = GetMSAAPoint(msaa_way, msaa_idx);
+					float pxf = p(0) + (float)_i;
+					float pyf = p(1) + (float)_j;
+					if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
 					{
-						if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
-							++cnt;
+						float z = 0.0f;	//wait for interpolation
+						pixel.m_MSAAPoints.emplace_back(std::make_pair(msaa_idx, z));
 					}
 				}
-				Pixel pixel;
 				pixel.m_X = _i;
 				pixel.m_Y = _j;
-				pixel.m_Z = 0.0f; //wait for interploation
-				pixel.m_MSAAValue = (float)cnt / (float)(msaa_x * msaa_y);
-				triangle.emplace_back(pixel);
+				triangle.emplace_back(std::move(pixel));
 			}
 		}
 		if (triangle.size())

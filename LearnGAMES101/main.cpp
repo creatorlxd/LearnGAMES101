@@ -34,12 +34,12 @@ int main()
 		i.m_Datas[0].first /= i.m_Datas[0].first(3);
 		i.m_Datas[0].first = i.m_Datas[0].first * view_port.GetViewPortMatrix();
 	}
-	auto solids = Rasterize(1920, 1080, vertices, indices, RasterizationState::Solid, 2, 2);
-	auto pic_out = DrawTriangles(1920, 1080, solids, RGBA(0, 0, 0, 255));
-	pic_out.Print("test_r_m2.png");
+	auto solids = Rasterize(1920, 1080, vertices, indices, RasterizationState::Solid, 4);
+	auto pic_out = DrawTriangles(1920, 1080, solids, RGBA(0, 0, 0, 255), 4);
+	pic_out.Print("test_rr_m2.png");
 
-	auto wireframe = Rasterize(1920, 1080, vertices, indices, RasterizationState::Wireframe, 2, 2);
-	auto pic_out2 = DrawTriangles(1920, 1080, wireframe, RGBA(0, 0, 0, 255));
-	pic_out2.Print("test2_r_m2.png");
+	auto wireframe = Rasterize(1920, 1080, vertices, indices, RasterizationState::Wireframe, 4);
+	auto pic_out2 = DrawTriangles(1920, 1080, wireframe, RGBA(0, 0, 0, 255), 4);
+	pic_out2.Print("test2_rr_m2.png");
 	return 0;
 }
