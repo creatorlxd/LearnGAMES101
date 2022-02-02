@@ -67,6 +67,11 @@ namespace
 
 		return LearnGames::Cross2(e01, e12) < 0.0f;
 	}
+
+	float InterpolatZ(const LearnGames::Vector4& p, const LearnGames::Vector4& p0, const LearnGames::Vector4& p1, const LearnGames::Vector4& p2)
+	{
+		return LearnGames::Interpolat<1>(p, p0, p1, p2, LearnGames::Vector<1>(p0(2)), LearnGames::Vector<1>(p1(2)), LearnGames::Vector<1>(p2(2)))(0);
+	}
 }
 
 LearnGames::Vector2 LearnGames::GetMSAAPoint(uint64_t msaa_way, uint64_t idx)
@@ -144,7 +149,7 @@ std::vector<std::vector<LearnGames::Pixel>> LearnGames::Rasterize(uint64_t width
 					float pyf = p(1) + (float)_j;
 					if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first))
 					{
-						float z = 0.0f;	//wait for interpolation
+						float z = InterpolatZ(Vector4(pxf, pyf, 0, 1), vertices[indices[i]].m_Datas[0].first, vertices[indices[i + 1]].m_Datas[0].first, vertices[indices[i + 2]].m_Datas[0].first);
 						pixel.m_MSAAPoints.emplace_back(std::make_pair(msaa_idx, z));
 					}
 				}

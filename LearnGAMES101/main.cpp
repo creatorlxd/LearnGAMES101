@@ -12,7 +12,21 @@ using namespace std;
 using namespace Eigen;
 using namespace LearnGames;
 
-int main()
+void TestInterpalot()
+{
+	LearnGames::Vector4 p(0.5f, 0.5f, 0, 1);
+	LearnGames::Vector4 p0(0, 0, 0, 1);
+	LearnGames::Vector4 p1(1, 0, 0, 1);
+	LearnGames::Vector4 p2(1, 1, 0, 1);
+	LearnGames::Vector2 d0(0, 0);
+	LearnGames::Vector2 d1(1, 0);
+	LearnGames::Vector2 d2(1, 1);
+	auto re = Interpolat<2>(p, p0, p1, p2, d0, d1, d2);
+	assert((re(0) - 0.5f) < 0.000001f);
+	assert((re(1) - 0.5f) < 0.000001f);
+}
+
+void TestRender()
 {
 	Camera camera;
 	ViewPort view_port;
@@ -41,5 +55,11 @@ int main()
 	auto wireframe = Rasterize(1920, 1080, vertices, indices, RasterizationState::Wireframe, 4);
 	auto pic_out2 = DrawTriangles(1920, 1080, wireframe, RGBA(0, 0, 0, 255), 4);
 	pic_out2.Print("test2_rr_m2.png");
+}
+
+int main()
+{
+	TestInterpalot();
+	TestRender();
 	return 0;
 }
