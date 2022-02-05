@@ -4,15 +4,16 @@
 #include "Picture.h"
 #include "Camera.h"
 #include "ViewPort.h"
-#include "InputData.h"
+#include "Data.h"
 #include "Rasterizer.h"
 #include "Output.h"
+#include "Render.h"
 
 using namespace std;
 using namespace Eigen;
 using namespace LearnGames;
 
-void TestInterpalot()
+void TestInterpolat()
 {
 	LearnGames::Vector4 p(0.5f, 0.5f, 0, 1);
 	LearnGames::Vector4 p0(0, 0, 0, 1);
@@ -26,14 +27,39 @@ void TestInterpalot()
 	assert((re(1) - 0.5f) < 0.000001f);
 }
 
+/*
+position
+color
+*/
+struct PositionColorData :public PositionData
+{
+	PositionColorData()
+	{
+		m_Datas.emplace_back(std::make_pair(LearnGames::Vector4(0, 0, 0, 1), DataProperty::Interpolation));
+	}
+
+	LearnGames::Vector4& GetColor()
+	{
+		return m_Datas[1].first;
+	}
+
+	const LearnGames::Vector4& GetColor()const
+	{
+		return m_Datas[1].first;
+	}
+};
+
 void TestRender()
 {
 	Camera camera;
 	ViewPort view_port;
-	std::vector<LearnGames::Vertex> vertices(3);
-	vertices[0].m_Datas[0].first = LearnGames::Vector4(0.0f, 6.0f, 0.0f, 1.0f);
-	vertices[1].m_Datas[0].first = LearnGames::Vector4(6.0f, -3.0f, 0.0f, 1.0f);
-	vertices[2].m_Datas[0].first = LearnGames::Vector4(-6.0f, -3.0f, 0.0f, 1.0f);
+	std::vector<PositionColorData> vertices(3);
+	vertices[0].GetPosition() = LearnGames::Vector4(0.0f, 6.0f, 0.0f, 1.0f);
+	vertices[1].GetPosition() = LearnGames::Vector4(6.0f, -3.0f, 0.0f, 1.0f);
+	vertices[2].GetPosition() = LearnGames::Vector4(-6.0f, -3.0f, 0.0f, 1.0f);
+	vertices[0].GetColor() = LearnGames::Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[1].GetColor() = LearnGames::Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[2].GetColor() = LearnGames::Vector4(0.0f, 0.0f, 1.0f, 1.0f);
 	std::vector<uint64_t> indices = { 0,1,2 };
 	camera.m_WHRatio = 1920.0f / 1080.0f;
 	view_port.m_Width = 1920;
@@ -42,24 +68,29 @@ void TestRender()
 	camera.m_Look << 0.0f, 0.0f, 1.0f, 0.0f;
 	camera.m_Up << 0.0f, 1.0f, 0.0f, 0.0f;
 	LearnGames::Matrix4 vp_mat = camera.GetViewMatrix() * camera.GetProjectionMatrix();
-	for (auto& i : vertices)
-	{
-		i.m_Datas[0].first = i.m_Datas[0].first * vp_mat;
-		i.m_Datas[0].first /= i.m_Datas[0].first(3);
-		i.m_Datas[0].first = i.m_Datas[0].first * view_port.GetViewPortMatrix();
-	}
-	auto solids = Rasterize(1920, 1080, vertices, indices, RasterizationState::Solid, 4);
-	auto pic_out = DrawTriangles(1920, 1080, solids, RGBA(0, 0, 0, 255), 4);
-	pic_out.Print("test_rr_m2.png");
+	LearnGames::Matrix4 viewport_mat = view_port.GetViewPortMatrix();
+	auto vs_func = [&vp_mat, &viewport_mat](const PositionColorData& data)->PositionColorData {
+		PositionColorData re;
+		re.GetPosition() = data.GetPosition() * vp_mat;
+		re.GetPosition() /= re.GetPosition()(3);
+		re.GetPosition() = re.GetPosition() * viewport_mat;
 
-	auto wireframe = Rasterize(1920, 1080, vertices, indices, RasterizationState::Wireframe, 4);
-	auto pic_out2 = DrawTriangles(1920, 1080, wireframe, RGBA(0, 0, 0, 255), 4);
-	pic_out2.Print("test2_rr_m2.png");
+		re.GetColor() = data.GetColor();
+
+		return re;
+	};
+	auto ps_func = [](const PositionColorData& data) -> LearnGames::Vector4 {
+		return data.GetColor();
+	};
+	auto pic_solid = Render<PositionColorData, PositionColorData>(1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Solid, 4);
+	pic_solid.Print("test_color_1.png");
+	auto pic_wireframe = Render<PositionColorData, PositionColorData>(1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Wireframe, 4);
+	pic_wireframe.Print("test_color_2.png");
 }
 
 int main()
 {
-	TestInterpalot();
+	TestInterpolat();
 	TestRender();
 	return 0;
 }

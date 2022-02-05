@@ -148,21 +148,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="InputData.cpp" />
+    <ClCompile Include="Data.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MathDefinition.cpp" />
     <ClCompile Include="Output.cpp" />
     <ClCompile Include="Picture.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
+    <ClCompile Include="Render.cpp" />
     <ClCompile Include="ViewPort.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="InputData.h" />
+    <ClInclude Include="Data.h" />
     <ClInclude Include="MathDefinition.h" />
     <ClInclude Include="Output.h" />
     <ClInclude Include="Picture.h" />
     <ClInclude Include="Rasterizer.h" />
+    <ClInclude Include="Render.h" />
     <ClInclude Include="ViewPort.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

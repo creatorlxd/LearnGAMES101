@@ -24,7 +24,7 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="InputData.cpp">
+    <ClCompile Include="Data.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Rasterizer.cpp">
@@ -39,6 +39,9 @@
     <ClCompile Include="Output.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Picture.h">
@@ -50,7 +53,7 @@
     <ClInclude Include="MathDefinition.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="InputData.h">
+    <ClInclude Include="Data.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Rasterizer.h">
@@ -60,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Output.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

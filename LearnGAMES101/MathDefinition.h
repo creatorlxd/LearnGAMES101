@@ -34,4 +34,6 @@ namespace LearnGames
 		Vector<Dim> de12 = d2 - d1;
 		return i * de01 + j * de12 + d0;
 	}
+
+	std::pair<float, float> HalfInterpolat(const Vector4& p, const Vector4& p0, const Vector4& p1, const Vector4& p2);
 }
