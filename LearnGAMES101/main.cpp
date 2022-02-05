@@ -135,8 +135,8 @@ void TestRenderTask()
 
 int main()
 {
-	TestInterpolat();
-	//TestRender();
-	TestRenderTask();
+	//TestInterpolat();
+	TestRender();
+	//TestRenderTask();
 	return 0;
 }
