@@ -65,28 +65,23 @@ namespace LearnGames
 				continue;
 
 			//calculate aabb box
-			uint64_t min_x = width, min_y = height;
-			uint64_t max_x = 0, max_y = 0;
+			int64_t min_x = width, min_y = height;
+			int64_t max_x = 0, max_y = 0;
 			for (uint64_t j = i; j < i + 3; ++j)
 			{
-				uint64_t x = floor(vertices[indices[j]].m_Datas[pos_idx].first(0));
-				uint64_t y = floor(vertices[indices[j]].m_Datas[pos_idx].first(1));
-				//edge process
-				if (x == width)
-					x -= 1;
-				if (y == height)
-					y -= 1;
-				assert(x < width);
-				assert(y < height);
+				int64_t x = floor(vertices[indices[j]].m_Datas[pos_idx].first(0));
+				int64_t y = floor(vertices[indices[j]].m_Datas[pos_idx].first(1));
 				min_x = std::min(min_x, x);
 				min_y = std::min(min_y, y);
 				max_x = std::max(max_x, x);
 				max_y = std::max(max_y, y);
 			}
-			for (uint64_t _i = min_x; _i <= max_x; ++_i)
+			for (int64_t _i = min_x; _i <= max_x; ++_i)
 			{
-				for (uint64_t _j = min_y; _j <= max_y; ++_j)
+				for (int64_t _j = min_y; _j <= max_y; ++_j)
 				{
+					if (_i < 0 || _i >= width || _j < 0 || _j >= height)
+						continue;
 					bool(*pjudge)(float, float, const Vector4&, const Vector4&, const Vector4&) = nullptr;
 					if (state == RasterizationState::Solid)
 						pjudge = &IsPixelInTriangle;
@@ -96,6 +91,7 @@ namespace LearnGames
 					Pixel pixel;
 					Vector4 pixel_point = Vector4::Zero();
 					uint64_t cnt = 0;
+					float z_total = 0.0f;
 					for (uint64_t msaa_idx = 0; msaa_idx < msaa_way; ++msaa_idx)
 					{
 						Vector2 p = GetMSAAPoint(msaa_way, msaa_idx);
@@ -104,11 +100,14 @@ namespace LearnGames
 						if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[pos_idx].first, vertices[indices[i + 1]].m_Datas[pos_idx].first, vertices[indices[i + 2]].m_Datas[pos_idx].first))
 						{
 							float z = InterpolatZ(Vector4(pxf, pyf, 0, 1), vertices[indices[i]].m_Datas[pos_idx].first, vertices[indices[i + 1]].m_Datas[pos_idx].first, vertices[indices[i + 2]].m_Datas[pos_idx].first);
+							z_total += z;
 							pixel_point += Vector4(pxf, pyf, z, 1);
 							++cnt;
 							pixel.m_MSAAPoints.emplace_back(std::make_pair(msaa_idx, z));
 						}
 					}
+					if (z_total < -1.0f * raster_eps)
+						continue;
 					if (cnt)
 					{
 						pixel_point /= (float)cnt;
@@ -192,28 +191,23 @@ namespace LearnGames
 					return;
 
 				//calculate aabb box
-				uint64_t min_x = width, min_y = height;
-				uint64_t max_x = 0, max_y = 0;
+				int64_t min_x = width, min_y = height;
+				int64_t max_x = 0, max_y = 0;
 				for (uint64_t j = i; j < i + 3; ++j)
 				{
-					uint64_t x = floor(vertices[indices[j]].m_Datas[pos_idx].first(0));
-					uint64_t y = floor(vertices[indices[j]].m_Datas[pos_idx].first(1));
-					//edge process
-					if (x == width)
-						x -= 1;
-					if (y == height)
-						y -= 1;
-					assert(x < width);
-					assert(y < height);
+					int64_t x = floor(vertices[indices[j]].m_Datas[pos_idx].first(0));
+					int64_t y = floor(vertices[indices[j]].m_Datas[pos_idx].first(1));
 					min_x = std::min(min_x, x);
 					min_y = std::min(min_y, y);
 					max_x = std::max(max_x, x);
 					max_y = std::max(max_y, y);
 				}
-				for (uint64_t _i = min_x; _i <= max_x; ++_i)
+				for (int64_t _i = min_x; _i <= max_x; ++_i)
 				{
-					for (uint64_t _j = min_y; _j <= max_y; ++_j)
+					for (int64_t _j = min_y; _j <= max_y; ++_j)
 					{
+						if (_i < 0 || _i >= width || _j < 0 || _j >= height)
+							continue;
 						sbf2.emplace([&, i, _i, _j]() {
 							bool(*pjudge)(float, float, const Vector4&, const Vector4&, const Vector4&) = nullptr;
 							if (state == RasterizationState::Solid)

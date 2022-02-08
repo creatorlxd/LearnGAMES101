@@ -10,9 +10,9 @@
 #include "Output.h"
 #include "Render.h"
 #include "Geometry.h"
+#include "Phong.h"
 
 using namespace std;
-using namespace Eigen;
 using namespace LearnGames;
 
 void TestInterpolat()
@@ -134,10 +134,42 @@ void TestRenderTask()
 	pic_wireframe.Print("test_color_2_tf.png");
 }
 
-void TestCube()
+void TestPhong()
 {
+	using namespace Phong;
+	Camera camera;
+	ViewPort view_port;
 	Geometry cube = GenerateCube();
-	std::cout << cube.m_Vertices[0].GetNormal() << std::endl;
+	Matrix4 world_mat = GetScalaTransform(3, 3, 3) * GetRotationYTransform(PI / 4.0f) * GetMoveTransform(0, 0, 0);
+	camera.m_WHRatio = 1920.0f / 1080.0f;
+	view_port.m_Width = 1920;
+	view_port.m_Height = 1080;
+	camera.m_Position << 0.0f, 0.0f, -5.0f, 1.0f;
+	camera.m_Look << 0.0f, 0.0f, 1.0f, 0.0f;
+	camera.m_Up << 0.0f, 1.0f, 0.0f, 0.0f;
+	LearnGames::Matrix4 vp_mat = camera.GetViewMatrix() * camera.GetProjectionMatrix();
+	LearnGames::Matrix4 viewport_mat = view_port.GetViewPortMatrix();
+	Material material;
+	material.m_Ambient = Vector4(0.1f, 0.1f, 0.1f, 1.0f);
+	material.m_Diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	material.m_Specular = Vector4(1.0f, 1.0f, 1.0f, 8.0f);
+	material.m_Emissive = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+	Light light;
+	light.m_Type = LightType::PointLight;
+	light.m_Ambient = Vector4(0.1f, 0.1f, 0.1f, 1.0f);
+	light.m_Diffuse = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	light.m_Specular = Vector4(1.0f, 1.0f, 1.0f, 8.0f);
+	light.m_Position = Vector3(-5.0f, 0.0f, 0.0f);
+	light.m_Direction = Vector3(0.0f, 0.0f, 1.0f);
+	light.m_Range = 1000.0f;
+	light.m_LightOption = Vector3(0.0f, 0.5f, 0.0f);
+	light.m_SpotLightOption = 4.0f;
+	std::vector<Light> lights;
+	lights.emplace_back(light);
+	auto pic_phong = Render<PositionNormalData, PhongVSOutputData>(1920, 1080, cube.m_Vertices, cube.m_Indices,
+		std::bind(PhongVertexShader, std::cref(world_mat), std::cref(vp_mat), std::cref(viewport_mat), std::placeholders::_1),
+		std::bind(PhongPixelShader, std::cref(material), std::cref(lights), std::cref(camera.m_Position), std::placeholders::_1), RasterizationState::Solid, 4);
+	pic_phong.Print("test_phong1.png");
 }
 
 int main()
@@ -145,6 +177,6 @@ int main()
 	//TestInterpolat();
 	//TestRender();
 	//TestRenderTask();
-	TestCube();
+	TestPhong();
 	return 0;
 }

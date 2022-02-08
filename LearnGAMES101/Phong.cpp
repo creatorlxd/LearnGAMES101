@@ -169,7 +169,9 @@ PhongVSOutputData LearnGames::Phong::PhongVertexShader(const Matrix4& world_mat,
 
 	re.GetWorldPosition() = data.GetPosition() * world_mat;
 
-	re.GetNormal() = (data.GetNormal() * (world_mat.inverse().transpose())).normalized();
+	re.GetNormal() = (data.GetNormal() * (world_mat.inverse().transpose()));
+	re.GetNormal()(3) = 0.0f;
+	re.GetNormal().normalize();
 	return re;
 }
 
@@ -179,7 +181,7 @@ Vector4 LearnGames::Phong::PhongPixelShader(const Material& material, const std:
 	Vector4 diffuse(0.0f, 0.0f, 0.0f, 0.0f);
 	Vector4 specular(0.0f, 0.0f, 0.0f, 0.0f);
 	Vector4 litcolor(0.0f, 0.0f, 0.0f, 0.0f);
-	GetColorByLightsEx(material, Lights, Vector4ToVector3(camera_position), Vector4ToVector3(data.GetWorldPosition()), Vector4ToVector3(data.GetNormal()), ambient, diffuse, specular);
+	GetColorByLightsEx(material, Lights, Vector4ToVector3(camera_position), Vector4ToVector3(data.GetWorldPosition()), Vector4ToVector3(data.GetNormal()).normalized(), ambient, diffuse, specular);
 	litcolor = ambient + diffuse + material.m_Emissive + specular;
 	litcolor(3) = material.m_Diffuse(3);
 	return litcolor;
@@ -187,7 +189,7 @@ Vector4 LearnGames::Phong::PhongPixelShader(const Material& material, const std:
 
 LearnGames::Phong::PhongVSOutputData::PhongVSOutputData()
 {
-	m_Datas.emplace_back(std::make_pair(Vector4::Zero(), DataProperty::None));
+	m_Datas.emplace_back(std::make_pair(Vector4::Zero(), DataProperty::Interpolation));
 }
 
 Vector4& LearnGames::Phong::PhongVSOutputData::GetWorldPosition()
