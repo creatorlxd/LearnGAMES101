@@ -9,6 +9,7 @@
 #include "Rasterizer.h"
 #include "Output.h"
 #include "Render.h"
+#include "Geometry.h"
 
 using namespace std;
 using namespace Eigen;
@@ -133,10 +134,17 @@ void TestRenderTask()
 	pic_wireframe.Print("test_color_2_tf.png");
 }
 
+void TestCube()
+{
+	Geometry cube = GenerateCube();
+	std::cout << cube.m_Vertices[0].GetNormal() << std::endl;
+}
+
 int main()
 {
 	//TestInterpolat();
-	TestRender();
+	//TestRender();
 	//TestRenderTask();
+	TestCube();
 	return 0;
 }

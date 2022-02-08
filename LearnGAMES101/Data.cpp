@@ -2,7 +2,7 @@
 
 LearnGames::PositionData::PositionData()
 {
-	m_Datas.emplace_back(std::make_pair(Vector4(), DataProperty::Position));		//position
+	m_Datas.emplace_back(std::make_pair(Vector4::Zero(), DataProperty::Position));		//position
 }
 
 LearnGames::Vector4& LearnGames::PositionData::GetPosition()

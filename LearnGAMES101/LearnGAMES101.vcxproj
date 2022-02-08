@@ -149,9 +149,11 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Data.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MathDefinition.cpp" />
     <ClCompile Include="Output.cpp" />
+    <ClCompile Include="Phong.cpp" />
     <ClCompile Include="Picture.cpp" />
     <ClCompile Include="Rasterizer.cpp" />
     <ClCompile Include="Render.cpp" />
@@ -160,8 +162,10 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Data.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="MathDefinition.h" />
     <ClInclude Include="Output.h" />
+    <ClInclude Include="Phong.h" />
     <ClInclude Include="Picture.h" />
     <ClInclude Include="Rasterizer.h" />
     <ClInclude Include="Render.h" />
