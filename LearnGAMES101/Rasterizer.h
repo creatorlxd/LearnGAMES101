@@ -91,7 +91,6 @@ namespace LearnGames
 					Pixel pixel;
 					Vector4 pixel_point = Vector4::Zero();
 					uint64_t cnt = 0;
-					float z_total = 0.0f;
 					for (uint64_t msaa_idx = 0; msaa_idx < msaa_way; ++msaa_idx)
 					{
 						Vector2 p = GetMSAAPoint(msaa_way, msaa_idx);
@@ -100,16 +99,15 @@ namespace LearnGames
 						if (pjudge(pxf, pyf, vertices[indices[i]].m_Datas[pos_idx].first, vertices[indices[i + 1]].m_Datas[pos_idx].first, vertices[indices[i + 2]].m_Datas[pos_idx].first))
 						{
 							float z = InterpolatZ(Vector4(pxf, pyf, 0, 1), vertices[indices[i]].m_Datas[pos_idx].first, vertices[indices[i + 1]].m_Datas[pos_idx].first, vertices[indices[i + 2]].m_Datas[pos_idx].first);
-							z_total += z;
 							pixel_point += Vector4(pxf, pyf, z, 1);
 							++cnt;
 							pixel.m_MSAAPoints.emplace_back(std::make_pair(msaa_idx, z));
 						}
 					}
-					if (z_total < -1.0f * raster_eps)
-						continue;
 					if (cnt)
 					{
+						if (pixel_point(2) < -1.0f * raster_eps)
+							continue;
 						pixel_point /= (float)cnt;
 						pixel.m_X = _i;
 						pixel.m_Y = _j;
@@ -233,6 +231,8 @@ namespace LearnGames
 							}
 							if (cnt)
 							{
+								if (pixel_point(2) < -1.0f * raster_eps)
+									continue;
 								pixel_point /= (float)cnt;
 								pixel.m_X = _i;
 								pixel.m_Y = _j;
