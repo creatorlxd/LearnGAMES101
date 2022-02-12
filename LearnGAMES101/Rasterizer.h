@@ -232,7 +232,7 @@ namespace LearnGames
 							if (cnt)
 							{
 								if (pixel_point(2) < -1.0f * raster_eps)
-									continue;
+									return;
 								pixel_point /= (float)cnt;
 								pixel.m_X = _i;
 								pixel.m_Y = _j;

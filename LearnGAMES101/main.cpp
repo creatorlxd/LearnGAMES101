@@ -84,10 +84,12 @@ void TestRender()
 	auto ps_func = [](const PositionColorData& data) -> LearnGames::Vector4 {
 		return data.GetColor();
 	};
-	auto pic_solid = Render<PositionColorData, PositionColorData>(1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Solid, 4);
-	pic_solid.Print("test_color_1.png");
-	auto pic_wireframe = Render<PositionColorData, PositionColorData>(1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Wireframe, 4);
-	pic_wireframe.Print("test_color_2.png");
+	ColorDepthBuffer cdb1(1920, 1080, 4);
+	Render<PositionColorData, PositionColorData>(cdb1, vertices, indices, vs_func, ps_func, RasterizationState::Solid);
+	cdb1.PrintToPicture().Print("test_color_1.png");
+	cdb1.ClearContent();
+	Render<PositionColorData, PositionColorData>(cdb1, vertices, indices, vs_func, ps_func, RasterizationState::Wireframe);
+	cdb1.PrintToPicture().Print("test_color_2.png");
 }
 
 void TestRenderTask()
@@ -124,14 +126,14 @@ void TestRenderTask()
 	auto ps_func = [](const PositionColorData& data) -> LearnGames::Vector4 {
 		return data.GetColor();
 	};
-	Picture pic_solid(1920, 1080), pic_wireframe(1920, 1080);
-	auto solid_tf = RenderTaskFlow<PositionColorData, PositionColorData>(pic_solid, 1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Solid, 4);
-	executor.run(solid_tf);
-	auto wireframe_tf = RenderTaskFlow<PositionColorData, PositionColorData>(pic_wireframe, 1920, 1080, vertices, indices, vs_func, ps_func, RasterizationState::Wireframe, 4);
-	executor.run(wireframe_tf);
-	executor.wait_for_all();
-	pic_solid.Print("test_color_1_tf.png");
-	pic_wireframe.Print("test_color_2_tf.png");
+	ColorDepthBuffer cdb1(1920, 1080, 4);
+	auto solid_tf = RenderTaskFlow<PositionColorData, PositionColorData>(cdb1, vertices, indices, vs_func, ps_func, RasterizationState::Solid);
+	executor.run(solid_tf).wait();
+	cdb1.PrintToPicture().Print("test_color_1_tf.png");
+	cdb1.ClearContent();
+	auto wireframe_tf = RenderTaskFlow<PositionColorData, PositionColorData>(cdb1, vertices, indices, vs_func, ps_func, RasterizationState::Wireframe);
+	executor.run(wireframe_tf).wait();
+	cdb1.PrintToPicture().Print("test_color_2_tf.png");
 }
 
 void TestPhong()
@@ -166,10 +168,11 @@ void TestPhong()
 	light.m_SpotLightOption = 4.0f;
 	std::vector<Light> lights;
 	lights.emplace_back(light);
-	auto pic_phong = Render<PositionNormalData, PhongVSOutputData>(1920, 1080, cube.m_Vertices, cube.m_Indices,
+	ColorDepthBuffer cdb(1920, 1080, 4);
+	Render<PositionNormalData, PhongVSOutputData>(cdb, cube.m_Vertices, cube.m_Indices,
 		std::bind(PhongVertexShader, std::cref(world_mat), std::cref(vp_mat), std::cref(viewport_mat), std::placeholders::_1),
-		std::bind(PhongPixelShader, std::cref(material), std::cref(lights), std::cref(camera.m_Position), std::placeholders::_1), RasterizationState::Solid, 4);
-	pic_phong.Print("test_phong1.png");
+		std::bind(PhongPixelShader, std::cref(material), std::cref(lights), std::cref(camera.m_Position), std::placeholders::_1), RasterizationState::Solid);
+	cdb.PrintToPicture().Print("test_phong1.png");
 }
 
 int main()
