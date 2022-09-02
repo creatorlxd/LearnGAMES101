@@ -82,7 +82,7 @@ Matrix4 LearnGames::GetRotationZTransform(float radian)
 	return re;
 }
 
-Matrix4 LearnGames::GetScalaTransform(float x, float y, float z)
+Matrix4 LearnGames::GetScaleTransform(float x, float y, float z)
 {
 	Matrix4 re = Matrix4::Identity();
 	re(0, 0) = x;

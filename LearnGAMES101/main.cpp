@@ -142,7 +142,7 @@ void TestPhong()
 	Camera camera;
 	ViewPort view_port;
 	Geometry cube = GenerateCube();
-	Matrix4 world_mat = GetScalaTransform(3, 3, 3) * GetRotationYTransform(PI / 4.0f) * GetMoveTransform(0, 0, 0);
+	Matrix4 world_mat = GetScaleTransform(3, 3, 3) * GetRotationYTransform(PI / 4.0f) * GetMoveTransform(0, 0, 0);
 	camera.m_WHRatio = 1920.0f / 1080.0f;
 	view_port.m_Width = 1920;
 	view_port.m_Height = 1080;

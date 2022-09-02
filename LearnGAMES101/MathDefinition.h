@@ -58,7 +58,7 @@ namespace LearnGames
 	Matrix4 GetRotationYTransform(float radian);
 	Matrix4 GetRotationZTransform(float radian);
 
-	Matrix4 GetScalaTransform(float x, float y, float z);
+	Matrix4 GetScaleTransform(float x, float y, float z);
 
 	Vector3 Reflect(const Vector3& v, const Vector3& normal);
 }
